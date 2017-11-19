@@ -102,7 +102,7 @@ namespace MyGenericUnitOfWork.IntegrationTest
             _db.SaveChanges();
 
             int productId = 2;
-            string pName = "Bing6003";
+            string pName = "Milk2017";
             Product product = _db.Repository<Product>().Get(productId);
             product.Name = pName;
 
@@ -119,10 +119,10 @@ namespace MyGenericUnitOfWork.IntegrationTest
         [TestMethod]
         public void CreateUnitOfWorkWithTwoRepository_WhenBothUpdateWithTransactionWithException_BothChangeShouldNotBeUpdateToDB()
         {
-            string newName = "Wang_123";
+            string newName = "Barry_123";
             int clientId = 1;
             int productId = 1;
-            string vName = "Bing_123";
+            string pName = "Milk_123";
 
             try
             {
@@ -133,7 +133,7 @@ namespace MyGenericUnitOfWork.IntegrationTest
                 _db.SaveChanges();
 
                 Product product = _db.Repository<Product>().Get(-productId);
-                product.Name = vName;
+                product.Name = pName;
 
                 _db.SaveChanges();
                 _db.Commit();
@@ -149,7 +149,7 @@ namespace MyGenericUnitOfWork.IntegrationTest
 
                 Product u = _db.Repository<Product>().Get(productId);
                 _db.Repository<Product>().Reload(u);
-                Assert.AreNotEqual(vName, u.Name);
+                Assert.AreNotEqual(pName, u.Name);
             }
         }
 
