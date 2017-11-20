@@ -11,11 +11,10 @@ namespace MyGenericUnitOfWork.Base
     public class UnitOfWork : IUnitOfWork
     {
         private bool _disposed;
-        private DbContext _context;
-        private Dictionary<Type, dynamic> _dictRepositories;
-        private DbContextTransaction _transaction;
+        private IAppContext _context;
+        private Dictionary<Type, dynamic> _dictRepositories;        
 
-        public UnitOfWork(DbContext context, params dynamic[] repositories)
+        public UnitOfWork(IAppContext context, params dynamic[] repositories)
         {
             if (context == null)
                 throw new ArgumentNullException("context");
@@ -67,23 +66,18 @@ namespace MyGenericUnitOfWork.Base
 
         public void BeginTransaction(IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
-            if (_context.Database.Connection.State != ConnectionState.Open)
-            {
-                _context.Database.Connection.Open();
-            }
-
-            _transaction = _context.Database.BeginTransaction(isolationLevel);
+            _context.BeginTransaction(isolationLevel);
         }
 
         public bool Commit()
         {
-            _transaction.Commit();
+            _context.Commit();
             return true;
         }
 
         public void Rollback()
         {
-            _transaction.Rollback();
+            _context.Rollback();
         }
 
         public void Dispose()
@@ -102,10 +96,7 @@ namespace MyGenericUnitOfWork.Base
                 try
                 {
                     _dictRepositories.Clear();
-                    if (_context != null && _context.Database.Connection.State == ConnectionState.Open)
-                    {
-                        _context.Database.Connection.Close();
-                    }
+                    _context.CloseConnection();
                 }
                 catch (ObjectDisposedException)
                 {

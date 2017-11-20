@@ -9,10 +9,10 @@ namespace MyGenericUnitOfWork.Base
 {
     public class Repository<T> : IRepository<T> where T : BaseEntity
     {
-        protected DbContext _context;
+        protected IAppContext _context;
         protected DbSet<T> _entities;
 
-        public Repository(MyAppContext context)
+        public Repository(IAppContext context)
         {
             _context = context;
             _entities = context.Set<T>();

@@ -1,9 +1,11 @@
 ﻿using BussinessCore.Model;
+using MyGenericUnitOfWork.Base;
 using System.Data.Entity;
+using System.Data;
 
-namespace MyGenericUnitOfWork.Base
+namespace MyGenericUnitOfWork
 {
-    public partial class MyAppContext : DbContext
+    public partial class MyAppContext : DbContext, IAppContext
     {
         public MyAppContext()
             : base("name=MyAppEntities")
@@ -21,6 +23,37 @@ namespace MyGenericUnitOfWork.Base
             modelBuilder.Entity<Product>().Property(x => x.TimeStamp).IsRowVersion();
 
             base.OnModelCreating(modelBuilder);
+        }
+
+        private DbContextTransaction _transaction;
+        public void BeginTransaction(IsolationLevel isolationLevel)
+        {
+            if (Database.Connection.State != ConnectionState.Open)
+            {
+                Database.Connection.Open();
+            }
+
+            _transaction = Database.BeginTransaction(isolationLevel);
+        }
+
+        public void Commit()
+        {
+            if (_transaction != null)
+                _transaction.Commit();
+        }
+
+        public void Rollback()
+        {
+            if (_transaction != null)
+                _transaction.Rollback();
+        }
+
+        public void CloseConnection()
+        {
+            if (Database.Connection.State == ConnectionState.Open)
+            {
+                Database.Connection.Close();
+            }
         }
 
         public virtual DbSet<Client> Clients { get; set; }

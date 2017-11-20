@@ -5,14 +5,14 @@ namespace MyGenericUnitOfWork.Migrations
     using System.Data.Entity.Migrations;
     using System.Linq;
 
-    public sealed class Configuration : DbMigrationsConfiguration<MyGenericUnitOfWork.Base.MyAppContext>
+    public sealed class Configuration : DbMigrationsConfiguration<MyGenericUnitOfWork.MyAppContext>
     {
         public Configuration()
         {
             AutomaticMigrationsEnabled = true;
         }
 
-        protected override void Seed(MyGenericUnitOfWork.Base.MyAppContext context)
+        protected override void Seed(MyGenericUnitOfWork.MyAppContext context)
         {
             //  This method will be called after migrating to the latest version.
 
