@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Core.Infrastructure
+namespace BussinessCore.Infrastructure
 {
     public class BaseEntity
     {

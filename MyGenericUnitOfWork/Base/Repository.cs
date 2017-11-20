@@ -1,4 +1,4 @@
-﻿using Core.Infrastructure;
+﻿using BussinessCore.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
@@ -9,14 +9,13 @@ namespace MyGenericUnitOfWork.Base
 {
     public class Repository<T> : IRepository<T> where T : BaseEntity
     {
-        private DbContext _context;
-        private DbSet<T> entities;
-        string errorMessage = string.Empty;
+        protected DbContext _context;
+        protected DbSet<T> _entities;
 
         public Repository(MyAppContext context)
         {
             _context = context;
-            entities = context.Set<T>();
+            _entities = context.Set<T>();
         }
 
         public Type EntityType
@@ -29,22 +28,22 @@ namespace MyGenericUnitOfWork.Base
 
         public List<T> GetAll()
         {
-            return entities.ToList();
+            return _entities.ToList();
         }
 
         public async Task<List<T>> GetAllAsync()
         {
-            return await entities.ToListAsync();
+            return await _entities.ToListAsync();
         }
 
         public T Get(long id)
         {
-            return entities.SingleOrDefault(i => i.Id == id);
+            return _entities.SingleOrDefault(i => i.Id == id);
         }
 
         public async Task<T> GetAsync(long id)
         {
-            return await entities.SingleOrDefaultAsync(i => i.Id == id);
+            return await _entities.SingleOrDefaultAsync(i => i.Id == id);
         }
 
         public void Insert(T entity)
@@ -53,7 +52,7 @@ namespace MyGenericUnitOfWork.Base
             {
                 throw new ArgumentNullException("entity");
             }
-            entities.Add(entity);
+            _entities.Add(entity);
         }
 
         public void Update(T entity)
@@ -70,7 +69,7 @@ namespace MyGenericUnitOfWork.Base
             T t = Get(id);
             if (t != default(T))
             {
-                entities.Remove(t);
+                _entities.Remove(t);
                 return t;
             }
 
@@ -83,7 +82,7 @@ namespace MyGenericUnitOfWork.Base
 
             if (t != default(T))
             {
-                entities.Remove(t);
+                _entities.Remove(t);
                 return t;
             }
 

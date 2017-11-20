@@ -2,10 +2,12 @@
 using System.Data;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MyGenericUnitOfWork.Base;
-using Core.Model;
+using BussinessCore.Model;
 using MyGenericUnitOfWork;
 using System.Linq;
 using System.Transactions;
+using FluentAssertions;
+using System.Threading.Tasks;
 
 namespace MyGenericUnitOfWork.IntegrationTest
 {
@@ -19,9 +21,9 @@ namespace MyGenericUnitOfWork.IntegrationTest
 
         [TestInitialize]
         public void SetUp()
-        {                        
-            MigrateDbToLatest();           
-            Seed();
+        {
+            DatabaseHelper.MigrateDbToLatest();
+            DatabaseHelper.Seed();
 
             _transactionScope = new TransactionScope();
             _context = new MyAppContext();
@@ -33,31 +35,6 @@ namespace MyGenericUnitOfWork.IntegrationTest
         {
             _transactionScope.Dispose();
         }
-
-        private static void MigrateDbToLatest()
-        {
-            var configuration = new MyGenericUnitOfWork.Migrations.Configuration();
-            var migrator = new System.Data.Entity.Migrations.DbMigrator(configuration);
-            migrator.Update();
-        }
-
-        public void Seed()
-        {
-            MyAppContext ctx = new MyAppContext();
-
-            if (ctx.Clients.Any())
-                return;
-
-            ctx.Clients.Add(new Client { ClientName = "Joe", Email = "Joe@hotmail.com", ClientPassWord = "AA" });
-            ctx.Clients.Add(new Client { ClientName = "Marry", Email = "Marry@hotmail.com", ClientPassWord = "CC" });
-            ctx.Clients.Add(new Client { ClientName = "John", Email = "John@hotmail.com", ClientPassWord = "BB" });
-
-            ctx.Products.Add(new Product { Name = "Bread" });
-            ctx.Products.Add(new Product { Name = "Milk" });
-
-            ctx.SaveChanges();
-        }
-
 
         [TestMethod]
         public void CreateUnitOfWork_ShouldContainsAllRepositories()
@@ -151,6 +128,28 @@ namespace MyGenericUnitOfWork.IntegrationTest
                 _db.Repository<Product>().Reload(u);
                 Assert.AreNotEqual(pName, u.Name);
             }
+        }
+
+        [TestMethod]
+        public void CreateUnitOfWorkWithTwoRepository_ClientRepository_GetAllClientsSortByName_ShouldWork()
+        {
+            ClientRepository clientRepoitory = _db.Repository<Client>() as ClientRepository;
+
+            var clients = clientRepoitory.GetAllClientsSortByName();
+
+            clients.Should().HaveCount(DatabaseHelper.ListClient.Count);
+            clients.Should().BeInAscendingOrder(c => c.ClientName);
+        }
+
+        [TestMethod]
+        public async Task CreateUnitOfWorkWithTwoRepository_ClientRepository_GetAllClientsSortByNameAsync_ShouldWork()
+        {
+            ClientRepository clientRepoitory = _db.Repository<Client>() as ClientRepository;
+
+            var clients = await clientRepoitory.GetAllClientsSortByNameAsync();
+
+            clients.Should().HaveCount(DatabaseHelper.ListClient.Count);
+            clients.Should().BeInAscendingOrder(c => c.ClientName);
         }
 
     }

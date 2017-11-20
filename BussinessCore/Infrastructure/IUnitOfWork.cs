@@ -2,7 +2,7 @@
 using System.Data;
 using System.Threading.Tasks;
 
-namespace Core.Infrastructure
+namespace BussinessCore.Infrastructure
 {
     public interface IUnitOfWork: IDisposable 
     {

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Core.Infrastructure
+namespace BussinessCore.Infrastructure
 {
     public interface IRepository<T> where T : BaseEntity
     {

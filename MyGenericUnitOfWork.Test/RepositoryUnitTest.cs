@@ -2,7 +2,7 @@
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MyGenericUnitOfWork.Base;
-using Core.Model;
+using BussinessCore.Model;
 using FluentAssertions;
 using Moq;
 using System.Collections.Generic;
@@ -15,13 +15,13 @@ namespace MyGenericUnitOfWork.Test
     [TestClass]
     public class RepositoryUnitTest
     {
-        List<Client> clients;
-        Mock<MyAppContext> mockContext;
+        List<Client> _clients;
+        Mock<MyAppContext> _mockContext;
 
         [TestInitialize]
         public void Setup()
         {
-            clients = new List<Client>
+            _clients = new List<Client>
             {
                 new Client {Id =1, ClientName="Trump",  Email="Trump@hotmail.com"},
                 new Client {Id =2, ClientName="Marry",  Email="Marry@hotmail.com"},
@@ -29,45 +29,50 @@ namespace MyGenericUnitOfWork.Test
             };
 
 
-            mockContext = new Mock<MyAppContext>();
+            _mockContext = new Mock<MyAppContext>();
         }
 
         [TestCleanup]
         public void TearDown()
         {
-            if (clients != null)
-                clients.Clear();
+            if (_clients != null)
+                _clients.Clear();
         }
 
         [TestMethod]
         public void CreateRepository_EntityType_ShouldBeToCorrect()
         {
-            Repository<Client> rep = new Repository<Client>(mockContext.Object);
+            Repository<Client> rep = new Repository<Client>(_mockContext.Object);
 
             rep.EntityType.Name.Should().Be("Client");
         }
 
         private Repository<Client> GetMockRepository()
         {
-            Mock<DbSet<Client>> mockClients = new Mock<DbSet<Client>>();
-            mockClients.SetMockData(clients);
+            SetMockClientDbSet();
 
-            mockContext.Setup(m => m.Clients).Returns(mockClients.Object);
-            mockContext.Setup(m => m.Set<Client>()).Returns(mockClients.Object);
-
-            Repository<Client> rep = new Repository<Client>(mockContext.Object);
+            Repository<Client> rep = new Repository<Client>(_mockContext.Object);
             return rep;
+        }
+
+        private void SetMockClientDbSet()
+        {
+            Mock<DbSet<Client>> mockClients = new Mock<DbSet<Client>>();
+            mockClients.SetMockData(_clients);
+
+            _mockContext.Setup(m => m.Clients).Returns(mockClients.Object);
+            _mockContext.Setup(m => m.Set<Client>()).Returns(mockClients.Object);
         }
 
         private Repository<Client> GetRepositoryForAsync()
         {
             Mock<DbSet<Client>> mockClients = new Mock<DbSet<Client>>();
-            mockClients.SetMockDataAsync(clients);
+            mockClients.SetMockDataAsync(_clients);
 
-            mockContext.Setup(m => m.Clients).Returns(mockClients.Object);
-            mockContext.Setup(m => m.Set<Client>()).Returns(mockClients.Object);
+            _mockContext.Setup(m => m.Clients).Returns(mockClients.Object);
+            _mockContext.Setup(m => m.Set<Client>()).Returns(mockClients.Object);
 
-            Repository<Client> rep = new Repository<Client>(mockContext.Object);
+            Repository<Client> rep = new Repository<Client>(_mockContext.Object);
             return rep;
         }
 
@@ -78,7 +83,7 @@ namespace MyGenericUnitOfWork.Test
 
             var queriedClients = rep.GetAll();
             queriedClients.Should().HaveCount(3);
-            queriedClients.ShouldAllBeEquivalentTo(clients);
+            queriedClients.ShouldAllBeEquivalentTo(_clients);
         }
 
         [TestMethod]
@@ -88,7 +93,7 @@ namespace MyGenericUnitOfWork.Test
 
             var queriedClients = await rep.GetAllAsync();
             queriedClients.Should().HaveCount(3);
-            queriedClients.ShouldAllBeEquivalentTo(clients);
+            queriedClients.ShouldAllBeEquivalentTo(_clients);
         }
 
         [TestMethod]
@@ -97,7 +102,7 @@ namespace MyGenericUnitOfWork.Test
             Repository<Client> rep = GetMockRepository();
 
             int id = 1;
-            Client expactClient = clients[id - 1];
+            Client expactClient = _clients[id - 1];
             var queriedClient = rep.Get(id);
 
             queriedClient.Should().Be(expactClient);
@@ -109,7 +114,7 @@ namespace MyGenericUnitOfWork.Test
             Repository<Client> rep = GetRepositoryForAsync();
 
             int id = 2;
-            Client expactClient = clients[id - 1];
+            Client expactClient = _clients[id - 1];
             var queriedClient = await rep.GetAsync(id);
 
             queriedClient.Should().Be(expactClient);
@@ -118,7 +123,7 @@ namespace MyGenericUnitOfWork.Test
         [TestMethod]
         public void Repository_InsertNull_ShouldThrowException()
         {
-            Repository<Client> rep = new Repository<Client>(mockContext.Object);
+            Repository<Client> rep = new Repository<Client>(_mockContext.Object);
 
             Action insert = () => rep.Insert(null);
             insert.ShouldThrow<ArgumentNullException>().And.Message.Contains("entity");
@@ -136,7 +141,7 @@ namespace MyGenericUnitOfWork.Test
             var queriedClients = rep.GetAll();
             queriedClients.Should().HaveCount(4);
 
-            Client expactClient = clients[id - 1];
+            Client expactClient = _clients[id - 1];
             var queriedClient = rep.Get(id);
             queriedClient.Should().Be(newClient);
         }
@@ -144,7 +149,7 @@ namespace MyGenericUnitOfWork.Test
         [TestMethod]
         public void Repository_UpdateNull_ShouldThrowException()
         {
-            Repository<Client> rep = new Repository<Client>(mockContext.Object);
+            Repository<Client> rep = new Repository<Client>(_mockContext.Object);
 
             Action insert = () => rep.Update(null);
             insert.ShouldThrow<ArgumentNullException>().And.Message.Contains("entity");
@@ -196,21 +201,17 @@ namespace MyGenericUnitOfWork.Test
             client.Should().BeNull();
         }
 
-        //[TestMethod]
-        //public void Repository_Reload_ShouldWork()
-        //{
-        //    Repository<Client> rep = GetMockRepository();
+        [TestMethod]
+        public void ClientRepository_GetAllClientsSortByName_ShouldWork()
+        {
+            SetMockClientDbSet();
+            ClientRepository clientRepoitory = new ClientRepository(_mockContext.Object);
 
-        //    Client expactClient = reloadClient;
-        //    var queriedClient = rep.Get(reloadClient.Id);
+            var clients = clientRepoitory.GetAllClientsSortByName();
 
-        //    queriedClient = queriedClient.Clone() as Client;
-        //    queriedClient.ClientName = "ChangedName";
-        //    rep.Reload(queriedClient);
-
-        //    queriedClient.ClientName.Should().NotBe(expactClient.ClientName);
-
-        //}
+            clients.Should().HaveCount(_clients.Count);
+            clients.Should().BeInAscendingOrder(c => c.ClientName);
+        }
 
     }
 }

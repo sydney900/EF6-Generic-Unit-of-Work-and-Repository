@@ -1,4 +1,4 @@
-﻿using Core.Infrastructure;
+﻿using BussinessCore.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Data;

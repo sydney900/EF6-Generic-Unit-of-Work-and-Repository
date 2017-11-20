@@ -1,4 +1,4 @@
-﻿using Core.Model;
+﻿using BussinessCore.Model;
 using System.Data.Entity;
 
 namespace MyGenericUnitOfWork.Base
