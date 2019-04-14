@@ -121,6 +121,54 @@ namespace MyGenericUnitOfWork.Test
         }
 
         [TestMethod]
+        public async Task Reposirtory_FindAsync_shouldWork()
+        {
+            Repository<Client> rep = GetRepositoryForAsync();
+
+            Client expactClient = _clients[1];
+            var queriedClients = await rep.FindAsync(c => c.ClientName == "Marry");
+
+            queriedClients.Should().HaveCount(1);
+            queriedClients[0].Should().Be(expactClient);
+        }
+
+        [TestMethod]
+        public void Reposirtory_Find_shouldWork()
+        {
+            Repository<Client> rep = GetMockRepository();
+
+            Client expactClient = _clients[2];
+            var queriedClients = rep.Find(c => c.Email == "John@hotmail.com" && c.ClientName == "John");
+
+            queriedClients.Should().HaveCount(1);
+            queriedClients[0].Should().Be(expactClient);
+        }
+
+        [TestMethod]
+        public async Task Reposirtory_FindByPropertyAsync_shouldWork()
+        {
+            Repository<Client> rep = GetRepositoryForAsync();
+
+            Client expactClient = _clients[1];
+            var queriedClients = await rep.FindByPropertyAsync("ClientName", "Marry");
+
+            queriedClients.Should().HaveCount(1);
+            queriedClients[0].Should().Be(expactClient);
+        }
+
+        [TestMethod]
+        public void Reposirtory_FindByProperty_shouldWork()
+        {
+            Repository<Client> rep = GetMockRepository();
+
+            Client expactClient = _clients[2];
+            var queriedClients = rep.FindByProperty("Email", "John@hotmail.com");
+
+            queriedClients.Should().HaveCount(1);
+            queriedClients[0].Should().Be(expactClient);
+        }
+
+        [TestMethod]
         public void Repository_InsertNull_ShouldThrowException()
         {
             Repository<Client> rep = new Repository<Client>(_mockContext.Object);

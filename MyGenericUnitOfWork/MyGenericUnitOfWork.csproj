@@ -65,6 +65,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AutoMapperConfig.cs" />
+    <Compile Include="Base\DynamicQueryExpressions.cs" />
     <Compile Include="Base\IAppContext.cs" />
     <Compile Include="MyAppContext.cs" />
     <Compile Include="Base\Repository.cs" />

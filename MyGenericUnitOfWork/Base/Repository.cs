@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 namespace MyGenericUnitOfWork.Base
@@ -34,6 +35,28 @@ namespace MyGenericUnitOfWork.Base
         public async Task<List<T>> GetAllAsync()
         {
             return await _entities.ToListAsync();
+        }
+
+        public List<T> Find(Expression<Func<T, bool>> predict)
+        {
+            return _entities.Where(predict).ToList();
+        }
+
+        public Task<List<T>> FindAsync(Expression<Func<T, bool>> predict)
+        {
+            return _entities.Where(predict).ToListAsync();
+        }
+
+        public List<T> FindByProperty(string propertyName, object propertyValue)
+        {
+            Expression<Func<T, bool>> predict = DynamicQueryExpressions<T>.GetExpresionTrees(propertyName, propertyValue);
+            return Find(predict).ToList();
+        }
+
+        public Task<List<T>> FindByPropertyAsync(string propertyName, object propertyValue)
+        {
+            Expression<Func<T, bool>> predict = DynamicQueryExpressions<T>.GetExpresionTrees(propertyName, propertyValue);
+            return FindAsync(predict);
         }
 
         public T Get(long id)
